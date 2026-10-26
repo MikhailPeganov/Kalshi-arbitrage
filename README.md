@@ -1,5 +1,3 @@
-# Kalshi-arbitrage
-[README_arbitrage.md](https://github.com/user-attachments/files/31801622/README_arbitrage.md)
 # Prediction Market Mispricing & Arbitrage Engine
 
 A Python engine that detects riskless arbitrage in Kalshi-style binary event prediction markets, using simulated live order book data.
@@ -12,7 +10,7 @@ Prediction markets price events as contracts worth $0 or $1 depending on the out
 
 2. **Group arbitrage (mutually exclusive outcomes)** — if a set of contracts covers every possible outcome of one event (e.g. "who wins: A, B, or C?"), their prices must sum to $1. If the sum of asks is below $1, buying one contract in every outcome guarantees a $1 payout for less than $1 spent.
 
-**Note:** this uses simulated order book data with injected mispricing shocks — there is no live Kalshi feed connected. The detection logic itself is identical to what would run against a real market data feed.
+> **Read this first:** this runs on **simulated order books** with injected mispricing shocks — there is no live Kalshi feed connected. The hit rates below measure the simulator's own injection settings, not an edge in any real market. What the project demonstrates is the detection logic and the no-arbitrage algebra, which is identical to what would run against a real feed. Fees, execution risk, order-book depth and position limits are not modelled; on real venues, fees alone would remove most edges this small.
 
 ## Example output
 
@@ -42,6 +40,8 @@ Example: at tick 229, outcome ask prices were:
   -> Guaranteed payout at settlement: $1.00 (exactly one outcome wins)
   -> Riskless profit: $0.163 per unit
 ```
+
+![Outcome prices, group and complement arbitrage windows, and riskless profit per contract](docs/kalshi_arbitrage.png)
 
 ## How it works
 
@@ -73,7 +73,7 @@ This prints a summary of detected arbitrage opportunities to the console and sav
 
 ## Parameters
 
-Key parameters are set near the top of `arbitrage_engine.py`:
+Key parameters are set near the top of `arbitrage_engine.py` (`mispricing_rate` is a keyword argument of `simulate_order_book`):
 
 | Parameter | Description | Default |
 |---|---|---|
@@ -82,6 +82,17 @@ Key parameters are set near the top of `arbitrage_engine.py`:
 | `true_probs` | "True" underlying probability of each outcome | [0.45, 0.35, 0.20] |
 | `spread` | Bid-ask spread on each contract | 0.02 |
 | `mispricing_rate` | Probability of an injected mispricing shock per tick | 0.08 |
+
+## What would make this real
+
+1. Replace the simulator with a live Kalshi or Polymarket WebSocket feed.
+2. Model fees, which on these venues are large relative to the edges above.
+3. Model depth: the top-of-book ask rarely fills the size the signal implies.
+4. Measure latency against each opportunity's lifetime.
+
+## License
+
+MIT, see `LICENSE`.
 
 ## Author
 
